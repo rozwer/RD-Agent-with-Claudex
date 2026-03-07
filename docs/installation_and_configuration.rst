@@ -24,13 +24,16 @@ Option 1: Unified API base for both models
 
    .. code-block:: Properties
 
-      # Set to any model supported by LiteLLM.
-      CHAT_MODEL=gpt-4o 
-      EMBEDDING_MODEL=text-embedding-3-small
-      # Configure unified API base
-      # The backend api_key fully follows the convention of litellm.
-      OPENAI_API_BASE=<your_unified_api_base>
-      OPENAI_API_KEY=<replace_with_your_openai_api_key>
+      # Default: Anthropic Claude (Claudex fork default)
+      CHAT_MODEL=anthropic/claude-sonnet-4-20250514
+      EMBEDDING_MODEL=voyage/voyage-3
+      ANTHROPIC_API_KEY=<replace_with_your_anthropic_api_key>
+      VOYAGE_API_KEY=<replace_with_your_voyage_api_key>
+
+      # Alternative: any model supported by LiteLLM (e.g. OpenAI)
+      # CHAT_MODEL=gpt-4o
+      # EMBEDDING_MODEL=text-embedding-3-small
+      # OPENAI_API_KEY=<replace_with_your_openai_api_key>
 
 Option 2: Separate API bases for Chat and Embedding models
 ----------------------------------------------------------

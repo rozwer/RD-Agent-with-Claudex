@@ -1,23 +1,27 @@
 from __future__ import annotations
 
 import io
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import fitz
 import requests
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
-from langchain_community.document_loaders import PyPDFDirectoryLoader, PyPDFLoader
 from PIL import Image
-
-if TYPE_CHECKING:
-    from langchain_core.documents import Document
+from pypdf import PdfReader
 
 from rdagent.core.conf import RD_AGENT_SETTINGS
 
 
-def load_documents_by_langchain(path: str) -> list:
+@dataclass
+class SimpleDocument:
+    """Lightweight Document compatible with langchain's Document interface."""
+    page_content: str = ""
+    metadata: dict = field(default_factory=dict)
+
+
+def load_documents_by_langchain(path: str) -> list[SimpleDocument]:
     """Load documents from the specified path.
 
     Args:
@@ -26,14 +30,21 @@ def load_documents_by_langchain(path: str) -> list:
     Returns:
         list: A list of loaded documents.
     """
-    if Path(path).is_dir():
-        loader = PyPDFDirectoryLoader(path, silent_errors=True)
-    else:
-        loader = PyPDFLoader(path)
-    return loader.load()
+    p = Path(path)
+    files = sorted(p.rglob("*.pdf")) if p.is_dir() else [p]
+    docs = []
+    for f in files:
+        try:
+            reader = PdfReader(str(f))
+            for page in reader.pages:
+                text = page.extract_text() or ""
+                docs.append(SimpleDocument(page_content=text, metadata={"source": str(f)}))
+        except Exception:
+            continue
+    return docs
 
 
-def process_documents_by_langchain(docs: list[Document]) -> dict[str, str]:
+def process_documents_by_langchain(docs: list[SimpleDocument]) -> dict[str, str]:
     """Process a list of documents and group them by document name.
 
     Args:
@@ -69,7 +80,7 @@ def load_and_process_one_pdf_by_azure_document_intelligence(
     key: str,
     endpoint: str,
 ) -> str:
-    pages = len(PyPDFLoader(str(path)).load())
+    pages = len(PdfReader(str(path)).pages)
     document_analysis_client = DocumentAnalysisClient(
         endpoint=endpoint,
         credential=AzureKeyCredential(key),

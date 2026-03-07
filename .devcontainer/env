@@ -10,16 +10,13 @@ TIMEOUT_FAIL_LIMIT=100
 
 CHAT_STREAM=False
 CHAT_TEMPERATURE=1
-CHAT_MODEL=o1-preview
-SYSTEM_PROMPT_ROLE=user
+CHAT_MODEL=anthropic/claude-sonnet-4-20250514
 
 BACKEND=rdagent.oai.backend.LiteLLMAPIBackend
-OPENAI_API_KEY=sk-1234
-OPENAI_API_BASE=http://ep14.213428.xyz:38881
-
+ANTHROPIC_API_KEY=
 
 # amc chat model configs:
-EMBEDDING_MODEL=text-embedding-ada-002
+EMBEDDING_MODEL=text-embedding-3-small
 
 # Cache Setting (Optional):
 DUMP_CHAT_CACHE=True

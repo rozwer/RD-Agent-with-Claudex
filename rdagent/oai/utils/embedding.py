@@ -11,6 +11,9 @@ from rdagent.oai.llm_conf import LLM_SETTINGS
 
 # Common embedding model token limits
 EMBEDDING_MODEL_LIMITS = {
+    "voyage-3": 32000,
+    "voyage-3-lite": 32000,
+    "voyage-code-3": 32000,
     "text-embedding-ada-002": 8191,
     "text-embedding-3-small": 8191,
     "text-embedding-3-large": 8191,

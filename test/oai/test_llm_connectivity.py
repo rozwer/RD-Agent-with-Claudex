@@ -4,8 +4,7 @@
 import concurrent.futures
 import os
 
-os.environ["OPENAI_API_KEY"] = "sk-1234"
-os.environ["OPENAI_API_BASE"] = "http://localhost:4000"
+os.environ.setdefault("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
 
 import litellm
 
@@ -15,18 +14,8 @@ from litellm import completion
 TIMEOUT = 30
 
 MODELS = [
-    "gpt-5",
-    "gpt-5.1",
-    "gpt-5.2",
-    "openai/gpt-5.1-chat",
-    "openai/gpt-5.2-chat",
-    "gpt-4o-mini",
-    "o3",
-    "o4-mini",
-    "gpt-5-mini",
-    "gpt-5-nano",
-    "gpt-4.1",
-    "gpt-4o",
+    "anthropic/claude-sonnet-4-20250514",
+    "anthropic/claude-haiku-4-5-20251001",
 ]
 
 

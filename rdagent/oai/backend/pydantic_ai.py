@@ -17,6 +17,7 @@ from rdagent.oai.llm_utils import APIBackend
 # we can't reuse any component to map the provider to the env name
 # So we have to hardcode on here.
 PROVIDER_TO_ENV_MAP = {
+    "anthropic": "ANTHROPIC",
     "openai": "OPENAI",
     "azure_ai": "AZURE_AI",
     "azure": "AZURE",
@@ -51,12 +52,14 @@ def get_agent_model() -> OpenAIChatModel:
     api_base = os.getenv(f"{prefix}_API_BASE", None)
 
     kwargs = {
-        "openai_reasoning_effort": compl_kwargs.get("reasoning_effort"),
         "max_tokens": compl_kwargs.get("max_tokens"),
         "temperature": compl_kwargs.get("temperature"),
     }
     if compl_kwargs.get("max_tokens") is None:
         kwargs["max_tokens"] = LLM_SETTINGS.chat_max_tokens
+    # Only pass reasoning_effort for OpenAI models that support it
+    if custom_llm_provider in ("openai", "azure", "azure_ai") and compl_kwargs.get("reasoning_effort"):
+        kwargs["openai_reasoning_effort"] = compl_kwargs["reasoning_effort"]
     settings = OpenAIChatModelSettings(**kwargs)
     return OpenAIChatModel(
         selected_model, provider=LiteLLMProvider(api_base=api_base, api_key=api_key), settings=settings

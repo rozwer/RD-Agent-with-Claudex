@@ -255,7 +255,9 @@ def get_data_processing_env(
     # Collect LLM API environment variables to pass to env.run()
     llm_env_vars = {"PYTHONPATH": "./"}  # Base env var
 
-    # Pass OPENAI_API_KEY directly
+    # Pass API keys to container
+    if api_key := os.getenv("ANTHROPIC_API_KEY"):
+        llm_env_vars["ANTHROPIC_API_KEY"] = api_key
     if api_key := os.getenv("OPENAI_API_KEY"):
         llm_env_vars["OPENAI_API_KEY"] = api_key
 

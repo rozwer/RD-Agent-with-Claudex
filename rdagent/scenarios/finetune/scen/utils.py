@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-import tiktoken
+import litellm
 
 from rdagent.app.finetune.llm.conf import FT_RD_SETTING
 from rdagent.core.utils import cache_with_pickle
@@ -14,8 +14,8 @@ from rdagent.log import rdagent_logger as logger
 from rdagent.scenarios.data_science.scen.utils import FileTreeGenerator
 from rdagent.utils import md5_hash
 
-# Fixed tokenizer model for token counting
-_TOKENIZER_MODEL = "gpt-3.5-turbo"
+# Model name used for token counting via LiteLLM
+_TOKENIZER_MODEL = "anthropic/claude-sonnet-4-20250514"
 
 
 def _find_data_files(dataset_path: Path, max_files: int = 50) -> list[Path]:
@@ -67,8 +67,7 @@ def _truncate_long_values(obj, max_length: int = 3000):
 def _compute_column_stats(data: list[dict]) -> dict[str, dict]:
     """Compute token statistics for each string column in the dataset.
 
-    Uses tiktoken batch encoding for 10-50x faster processing.
-    Fixed to use gpt-3.5-turbo tokenizer.
+    Uses litellm.token_counter for provider-agnostic token counting.
 
     Args:
         data: List of dictionaries representing dataset samples
@@ -86,12 +85,6 @@ def _compute_column_stats(data: list[dict]) -> dict[str, dict]:
         if isinstance(item, dict):
             all_columns.update(item.keys())
 
-    # Get tiktoken encoder (cached after first call)
-    try:
-        encoding = tiktoken.encoding_for_model(_TOKENIZER_MODEL)
-    except Exception:
-        encoding = tiktoken.get_encoding("cl100k_base")
-
     column_stats = {}
     for col in all_columns:
         texts: list[str] = []
@@ -108,13 +101,14 @@ def _compute_column_stats(data: list[dict]) -> dict[str, dict]:
                         texts.append(val)
 
         if texts:
-            # Batch encode all texts at once (10-50x faster than individual calls)
             try:
-                encoded_batch = encoding.encode_batch(texts)
-                token_counts = [len(tokens) for tokens in encoded_batch]
+                token_counts = [
+                    litellm.token_counter(model=_TOKENIZER_MODEL, text=t)
+                    for t in texts
+                ]
             except Exception as e:
-                logger.warning(f"Batch encoding failed for column '{col}': {e}, falling back to sequential")
-                token_counts = [len(encoding.encode(t)) for t in texts]
+                logger.warning(f"Token counting failed for column '{col}': {e}, falling back to char/4")
+                token_counts = [len(t) // 4 for t in texts]
 
             column_stats[col] = {
                 "empty_count": empty_count,

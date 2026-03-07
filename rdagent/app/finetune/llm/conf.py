@@ -98,7 +98,7 @@ class LLMFinetunePropSetting(ExtendedBaseSettings):
     weak_models: list[str] = ["gpt-4o-mini", "o4-mini", "gpt-5-mini"]
     """Weak models for simple tasks (filtering, format conversion) - supports list (env: FT_WEAK_MODELS)"""
 
-    embedding_models: list[str] = ["text-embedding-3-small", "text-embedding-3-large"]
+    embedding_models: list[str] = ["voyage/voyage-3", "voyage/voyage-3-lite"]
 
     # Docker settings
     docker_enable_cache: bool = False

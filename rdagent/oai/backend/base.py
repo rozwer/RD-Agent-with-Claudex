@@ -27,11 +27,10 @@ from rdagent.utils import md5_hash
 
 try:
     import litellm
-    import openai
 
-    openai_imported = True
+    litellm_imported = True
 except ImportError:
-    openai_imported = False
+    litellm_imported = False
 
 
 class JSONParser:
@@ -584,23 +583,22 @@ class APIBackend(ABC):
                             logger.warning("Content policy violation detected.")
                             raise PolicyError(e)
 
-                    if (
-                        openai_imported
-                        and isinstance(e, openai.APITimeoutError)
-                        or (
-                            isinstance(e, openai.APIError)
-                            and hasattr(e, "message")
-                            and "Your resource has been temporarily blocked because we detected behavior that may violate our content policy."
-                            in e.message
-                        )
-                    ):
+                    is_timeout = (
+                        litellm_imported and isinstance(e, litellm.Timeout)
+                    ) or isinstance(e, TimeoutError)
+                    is_content_policy = (
+                        hasattr(e, "message")
+                        and "Your resource has been temporarily blocked" in str(getattr(e, "message", ""))
+                    )
+                    if is_timeout or is_content_policy:
                         timeout_count += 1
                         if timeout_count >= LLM_SETTINGS.timeout_fail_limit:
                             logger.warning("Timeout error, please check your network connection.")
                             raise e
 
                     recommended_wait_seconds = self.retry_wait_seconds
-                    if openai_imported and isinstance(e, openai.RateLimitError) and hasattr(e, "message"):
+                    is_rate_limit = litellm_imported and isinstance(e, litellm.RateLimitError)
+                    if is_rate_limit and hasattr(e, "message"):
                         match = re.search(r"Please retry after (\d+) seconds\.", e.message)
                         if match:
                             recommended_wait_seconds = int(match.group(1))
