@@ -2,6 +2,30 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
+  adapter-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -e .
+      - name: Run adapter tests
+        run: pytest test/adapters/ -v
+  lint-openai-allowlist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify no direct OpenAI imports in rdagent/
+        run: |
+          MATCHES=$(grep -rn "from openai\|import openai" --include="*.py" rdagent/ || true)
+          if [ -n "$MATCHES" ]; then
+            echo "ERROR: Direct OpenAI imports found:"
+            echo "$MATCHES"
+            exit 1
+          fi
+          echo "No direct OpenAI imports found."
   ci:
     if: ${{ !cancelled() && ! failure() }}
     needs: dependabot
