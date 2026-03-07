@@ -3,10 +3,16 @@ import socket
 
 import docker
 import fire
-import litellm
 import typer
-from litellm import completion, embedding
-from litellm.utils import ModelResponse
+
+try:
+    import litellm
+    from litellm import completion, embedding
+    from litellm.utils import ModelResponse
+
+    _litellm_available = True
+except ImportError:
+    _litellm_available = False
 from typing_extensions import Annotated
 
 from rdagent.log import rdagent_logger as logger

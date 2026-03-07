@@ -4,9 +4,14 @@ Embedding utilities for handling token limits and text truncation.
 
 from typing import Optional
 
-from litellm import decode, encode, get_max_tokens, token_counter
-
 from rdagent.log import rdagent_logger as logger
+
+try:
+    from litellm import decode, encode, get_max_tokens, token_counter
+
+    _litellm_available = True
+except ImportError:
+    _litellm_available = False
 from rdagent.oai.llm_conf import LLM_SETTINGS
 
 # Common embedding model token limits
@@ -46,12 +51,13 @@ def get_embedding_max_tokens(model: str) -> int:
     model_name = model.split("/")[-1] if "/" in model else model
 
     # Level 1: Try litellm
-    try:
-        max_tokens = get_max_tokens(model_name)
-        if max_tokens and max_tokens > 0:
-            return max_tokens
-    except Exception as e:
-        logger.warning(f"Failed to get max tokens for {model_name}: {e}")
+    if _litellm_available:
+        try:
+            max_tokens = get_max_tokens(model_name)
+            if max_tokens and max_tokens > 0:
+                return max_tokens
+        except Exception as e:
+            logger.warning(f"Failed to get max tokens for {model_name}: {e}")
 
     # Level 2: Query mapping table
     if model_name in EMBEDDING_MODEL_LIMITS:
@@ -85,6 +91,14 @@ def trim_text_for_embedding(text: str, model: str, max_tokens: Optional[int] = N
 
     # Apply safety margin
     safe_max_tokens = int(max_tokens * 0.9)
+
+    if not _litellm_available:
+        # Without litellm, use a rough character-based truncation
+        char_limit = safe_max_tokens * 4  # ~4 chars per token heuristic
+        if len(text) > char_limit:
+            logger.warning(f"litellm not available; truncating text by character limit ({char_limit} chars)")
+            return text[:char_limit]
+        return text
 
     # Calculate current token count
     current_tokens = token_counter(model=model, text=text)

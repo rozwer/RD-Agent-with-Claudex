@@ -7,8 +7,6 @@ filelock
 loguru
 fire
 fuzzywuzzy
-openai
-litellm>=1.73  # to support `from litellm import get_valid_models`
 azure.identity
 pyarrow
 rich
@@ -70,7 +68,6 @@ azureml-mlflow
 types-pytz
 
 # Agent
-pydantic-ai-slim[mcp,openai,prefect]
 nest-asyncio
 
 # visualize SFT train
