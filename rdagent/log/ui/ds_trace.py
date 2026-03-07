@@ -10,7 +10,10 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from litellm import get_valid_models
+try:
+    from litellm import get_valid_models
+except ImportError:
+    get_valid_models = lambda: []  # noqa: E731
 from streamlit import session_state as state
 
 from rdagent.app.data_science.loop import DataScienceRDLoop

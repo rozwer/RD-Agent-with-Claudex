@@ -1,0 +1,7 @@
+# Legacy LLM SDK dependencies — only needed for non-Claudex scenarios
+# (kaggle, data_science, finetune) that still use Python-level LLM calls.
+# Claudex factor scenario does not require these.
+# Install with: pip install rdagent[llm]
+openai
+litellm>=1.73
+pydantic-ai-slim[mcp,openai,prefect]

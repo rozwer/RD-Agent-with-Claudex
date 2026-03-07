@@ -110,6 +110,7 @@ dependencies = {file = ["requirements.txt"]}
 [tool.setuptools.dynamic.optional-dependencies]
 docs = {file = ["requirements/docs.txt"]}
 lint = {file = ["requirements/lint.txt"]}
+llm = {file = ["requirements/llm.txt"]}  # legacy LLM SDK deps (litellm/openai/pydantic-ai); not needed for Claudex
 package = {file = ["requirements/package.txt"]}
 test = {file = ["requirements/test.txt"]}
 torch = {file = ["requirements/torch.txt"]} # some agent algorithms need torch.  pip install rdagent[torch]

@@ -112,7 +112,7 @@ class LoopBase:
     class LoopResumeError(Exception):
         """Exception raised when loop conditions indicate the loop should stop all coroutines and resume"""
 
-    def __init__(self) -> None:
+    def __init__(self, *, use_pickle_session: bool = True) -> None:
         # progress control
         self.loop_idx: int = 0  # current loop index / next loop index to kickoff
         self.step_idx: defaultdict[int, int] = defaultdict(int)  # dict from loop index to next step index
@@ -132,6 +132,9 @@ class LoopBase:
         self.step_n: Optional[int] = None  # remain step count
 
         self.semaphores: dict[str, asyncio.Semaphore] = {}
+
+        # When False, skip pickle-based session dump/load (e.g. Claudex adapters use artifact JSON as SSOT)
+        self.use_pickle_session: bool = use_pickle_session
 
     def get_unfinished_loop_cnt(self, next_loop: int) -> int:
         n = 0
@@ -300,7 +303,7 @@ class LoopBase:
                         # Save snapshot after completing the step;
                         # 1) It has to be after the step_idx is updated, so loading the snapshot will be on the right step.
                         # 2) Only save it when the step forward, withdraw does not worth saving.
-                        if name in self.loop_prev_out[li]:
+                        if self.use_pickle_session and name in self.loop_prev_out[li]:
                             # 3) Only dump the step if (so we don't have to redo the step when we load the session again)
                             # it has been executed successfully
                             self.dump(self.session_folder / f"{li}" / f"{si}_{name}")
@@ -403,6 +406,9 @@ class LoopBase:
                 self.close_pbar()
 
     def withdraw_loop(self, loop_idx: int) -> None:
+        if not self.use_pickle_session:
+            logger.warning(f"Pickle session disabled; cannot withdraw loop {loop_idx}. Skipping.")
+            return
         prev_session_dir = self.session_folder / str(loop_idx - 1)
         prev_path = min(
             (p for p in prev_session_dir.glob("*_*") if p.is_file()),

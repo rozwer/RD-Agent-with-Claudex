@@ -6,7 +6,13 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-import litellm
+
+try:
+    import litellm
+
+    _litellm_available = True
+except ImportError:
+    _litellm_available = False
 
 from rdagent.app.finetune.llm.conf import FT_RD_SETTING
 from rdagent.core.utils import cache_with_pickle
@@ -101,13 +107,16 @@ def _compute_column_stats(data: list[dict]) -> dict[str, dict]:
                         texts.append(val)
 
         if texts:
-            try:
-                token_counts = [
-                    litellm.token_counter(model=_TOKENIZER_MODEL, text=t)
-                    for t in texts
-                ]
-            except Exception as e:
-                logger.warning(f"Token counting failed for column '{col}': {e}, falling back to char/4")
+            if _litellm_available:
+                try:
+                    token_counts = [
+                        litellm.token_counter(model=_TOKENIZER_MODEL, text=t)
+                        for t in texts
+                    ]
+                except Exception as e:
+                    logger.warning(f"Token counting failed for column '{col}': {e}, falling back to char/4")
+                    token_counts = [len(t) // 4 for t in texts]
+            else:
                 token_counts = [len(t) // 4 for t in texts]
 
             column_stats[col] = {
