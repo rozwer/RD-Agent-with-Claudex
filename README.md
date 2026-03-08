@@ -1,3 +1,13 @@
+> **Important**: This repository is a subproject of [Qlib-with-Claudex (parent)](https://github.com/rozwer/Qlib-with-Claudex).
+> Clone the **parent repository first** to get Claude Code skills, subagents, and settings required for the R&D loop.
+>
+> ```bash
+> git clone git@github.com:rozwer/Qlib-with-Claudex.git Qlib && cd Qlib
+> git clone git@github.com:rozwer/RD-Agent-with-Claudex.git RD-Agent-with-Claudex
+> ```
+
+---
+
 <h4 align="center">
   <img src="docs/_static/logo.png" alt="RA-Agent logo" style="width:70%; ">
   
