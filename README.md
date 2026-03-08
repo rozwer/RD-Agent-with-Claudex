@@ -7,6 +7,52 @@
 
 ---
 
+## What's Different in this Fork (with-Claudex)
+
+This fork replaces RD-Agent's OpenAI API dependency with **Claude Code + Codex CLI**, achieving a **control inversion** where Claude Code orchestrates Python/Qlib as tools.
+
+### Key Changes
+
+| Component | Original (OpenAI) | This Fork (Claude) |
+|-----------|-------------------|---------------------|
+| LLM Backend | OpenAI API (GPT-4) | LiteLLM + Claude (default) |
+| Hypothesis Generation | Python → OpenAI API | Claude Code Planner subagent |
+| Code Generation | Python → OpenAI API | Codex CLI (`codex exec --full-auto`) or Claude subagent |
+| Evaluation | Python → OpenAI API | Claude Code Evaluator subagent |
+| Orchestration | Python RDLoop | Claude Code orchestrates via Bash + Agent tool |
+
+### Architecture
+
+```
+Claude Code (Orchestrator)
+  ├── Planner   → Hypothesis + experiment spec (Agent tool)
+  ├── Coder     → factor.py generation (Codex CLI or Agent tool)
+  ├── Backtest  → python factor.py (Bash, RD-Agent venv)
+  ├── IC Calc   → scripts/calc_ic.py (Bash)
+  └── Evaluator → Metrics evaluation (Agent tool)
+```
+
+### Added Files
+
+- `rdagent/adapters/` — 5-slot Adapter layer bridging Claude output to RD-Agent data structures
+- `test/adapters/` — 38 unit tests for the adapter layer
+
+### Quick Start
+
+```bash
+cd RD-Agent-with-Claudex
+source .venv/bin/activate
+pytest test/adapters/ -v  # Run adapter tests (38 pass)
+```
+
+For the full R&D loop setup, see the [parent repository README](https://github.com/rozwer/Qlib-with-Claudex).
+
+---
+
+*Below is the original Microsoft RD-Agent README for reference.*
+
+---
+
 <h4 align="center">
   <img src="docs/_static/logo.png" alt="RA-Agent logo" style="width:70%; ">
   
