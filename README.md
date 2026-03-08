@@ -1,9 +1,8 @@
-> **Important**: This repository is a subproject of [Qlib-with-Claudex (parent)](https://github.com/rozwer/Qlib-with-Claudex).
-> Clone the **parent repository first** to get Claude Code skills, subagents, and settings required for the R&D loop.
+> **Important**: This repository is a submodule of [Qlib-with-Claudex (parent)](https://github.com/rozwer/Qlib-with-Claudex).
+> Clone the **parent repository with submodules** to get Claude Code skills, subagents, and settings required for the R&D loop.
 >
 > ```bash
-> git clone git@github.com:rozwer/Qlib-with-Claudex.git Qlib && cd Qlib
-> git clone git@github.com:rozwer/RD-Agent-with-Claudex.git RD-Agent-with-Claudex
+> git clone --recurse-submodules git@github.com:rozwer/Qlib-with-Claudex.git Qlib
 > ```
 
 ---
