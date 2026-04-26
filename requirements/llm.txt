@@ -3,5 +3,5 @@
 # Claudex factor scenario does not require these.
 # Install with: pip install rdagent[llm]
 openai
-litellm>=1.73
+litellm>=1.83.14
 pydantic-ai-slim[mcp,openai,prefect]
